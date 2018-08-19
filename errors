@@ -7,3 +7,11 @@
         "fabric-client": "1.2.1",
         "grpc": "^1.6.0"
     }
+2.# github.com/hyperledger/fabric/vendor/github.com/docker/docker/pkg/archive
+	../github.com/hyperledger/fabric/vendor/github.com/docker/docker/pkg/archive/archive.go:364:5: hdr.Format undefined (type *tar.Header has no field or method Format)
+	../github.com/hyperledger/fabric/vendor/github.com/docker/docker/pkg/archive/archive.go:364:15: undefined: tar.FormatPAX
+	../github.com/hyperledger/fabric/vendor/github.com/docker/docker/pkg/archive/archive.go:1166:7: hdr.Format undefined (type *tar.Header has no field or method Format)
+	../github.com/hyperledger/fabric/vendor/github.com/docker/docker/pkg/archive/archive.go:1166:17: undefined: tar.FormatPAX
+	原因应该是go的语法的问题。
+	解决：
+		将依赖的github库切换到release-1.1.0
