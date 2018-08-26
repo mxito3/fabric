@@ -33,3 +33,19 @@
 		working_dir指的是进入容器时的默认位置
 		volumes是本地环境到容器的映射，测试自己的chaincode的时候只需要将chaincode的目录映射过去其他的不用改。
 		command指的是容器启动后执行的命令（注意可能会依赖映射过去的文件）
+	命令：
+		cd chaincode-docker-devmode
+		启动网络：
+			docker-compose -f docker-compose-simple.yaml up
+		运行chaincode:
+			docker exec -it chaincode bash
+			CORE_PEER_ADDRESS=peer:7052 CORE_CHAINCODE_ID_NAME=mycc:0 ./chaincodeName   (chaincodeName是编译过的链码)
+		初始化链码，调用链码
+		docker exec -it cli bash
+		peer chaincode install -p chaincodedev/chaincode/sacc -n mycc -v 0
+		peer chaincode instantiate -n mycc -v 0 -c '{"Args":["a","10"]}' -C myc
+		peer chaincode invoke -n mycc -c '{"Args":["set", "a", "20"]}' -C myc
+		peer chaincode query -n mycc -c '{"Args":["query","a"]}' -C myc
+
+
+
