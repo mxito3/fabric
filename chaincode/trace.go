@@ -214,25 +214,36 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	// Extract the function and args from the transaction proposal
 	fn, args := stub.GetFunctionAndParameters()
 	// _ := args
+
+	fmt.Println("参数是")
 	fmt.Println(args)
 
 	var err error
+	var getResult string
 	//先创建对象
 	var tra *trace
 	var result bool
+	fmt.Println(result)
 	tra = newTrace()
 	traceTest, _ := stub.GetState("trace")
 	json.Unmarshal(traceTest, tra)
 
+	fmt.Println("调用前获取到是：")
+	fmt.Println(*tra)
 	if fn == "getTraceInfo" { // assume 'get' even if fn is nil
-		_, err = getTraceInfo(stub)
+		getResult, err = getTraceInfo(stub)
+		fmt.Println("get函数获取到的是")
+		fmt.Println(getResult)
+		return shim.Success([]byte(getResult))
 	} else if fn == "isExist" {
 		//需要装成
 		if len(args) != 1 {
 			err = argsNumError(len(args))
 		} else {
 			id, _ := strconv.ParseInt(args[0], 10, 64)
-			tra.isExist(id)
+			test := strconv.FormatBool(tra.isExist(id))
+			fmt.Println("判断函数返回的是" + test)
+			return shim.Success([]byte(test))
 		}
 		// addcrab(_id int64, _poolId int64, _operator string) bool
 		// 	isExist(_id int64) bool
@@ -248,6 +259,8 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 			poolId, _ := strconv.ParseInt(args[1], 10, 64)
 			operator := args[2]
 			result = tra.addcrab(id, poolId, operator)
+			fmt.Println("添加完成,*tra是")
+			fmt.Println(*tra)
 		}
 	} else if fn == "pushFeed" {
 		if len(args) != 3 {
@@ -257,6 +270,8 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 			feedName := args[1]
 			operator := args[2]
 			result = tra.pushFeed(id, feedName, operator)
+			fmt.Println("pushfeed完成,*tra是")
+			fmt.Println(*tra)
 		}
 	} else if fn == "pushWaterQuality" {
 		if len(args) != 5 {
@@ -268,7 +283,8 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 			animalDensity, _ := strconv.ParseInt(args[3], 10, 32)
 			operator := args[4]
 			result = tra.pushWaterQuality(id, whetherQualified, checkAgent, int32(animalDensity), operator)
-
+			fmt.Println("pushWater完成,*tra是")
+			fmt.Println(*tra)
 		}
 	} else if fn == "pushTransfer" {
 		if len(args) != 4 {
@@ -279,6 +295,8 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 			to := args[2]
 			operator := args[3]
 			result = tra.pushTransfer(id, from, to, operator)
+			fmt.Println("pushTransfer完成,*tra是")
+			fmt.Println(*tra)
 		}
 	} else if fn == "pushStore" {
 		if len(args) != 4 {
@@ -289,16 +307,29 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 			wetness, _ := strconv.ParseInt(args[2], 10, 32)
 			operator := args[3]
 			result = tra.pushStore(id, int(temperature), int(wetness), operator)
+			fmt.Println("pushStore完成,*tra是")
+			fmt.Println(json.Marshal(*tra))
 		}
 	}
 
 	invokeResult, jsonErr := json.Marshal(*tra)
 	if jsonErr != nil {
 		err = fmt.Errorf("trace对象转json失败")
-	} else if result == true {
+	} else {
+		fmt.Println("要存储了，json是")
+		fmt.Println(invokeResult)
 		err = stub.PutState("trace", invokeResult)
 		if err != nil {
 			err = fmt.Errorf("更改trace失败 %s", err)
+		} else {
+			fmt.Println("调用后获取到是：")
+
+			//可能还没确认
+			var tra1 *trace
+			tra1 = newTrace()
+			traceAfter, _ := stub.GetState("trace")
+			json.Unmarshal(traceAfter, tra1)
+			fmt.Println(*tra1)
 		}
 	}
 
@@ -307,7 +338,7 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	}
 
 	// Return the result as success payload
-	return shim.Success([]byte(invokeResult))
+	return shim.Success(invokeResult)
 }
 
 // Set stores the asset (both key and value) on the ledger. If the key exists,
@@ -323,7 +354,8 @@ func getTraceInfo(stub shim.ChaincodeStubInterface) (string, error) {
 		return "账本是空的", nil
 	}
 	// fmt.Println(data)
-
+	fmt.Println("getTrace里面数据是")
+	fmt.Println(string(data))
 	//账本存在且不为空
 	return string(data), nil
 }
@@ -360,22 +392,22 @@ func getTraceInfo(stub shim.ChaincodeStubInterface) (string, error) {
 // main function starts up the chaincode in the container during instantiate
 
 func main() {
-	// var traceTest *trace
-	// traceTest = newTrace()
-	// traceTest.addcrab(1, 11, "yapie")
-	// traceTest.pushFeed(1, "milk", "yapie")
-	// traceTest.pushWaterQuality(1, true, "chengdu agent", 1111, "yapie")
-	// traceTest.pushTransfer(1, "chengdu", "tianshui", "yapie")
-	// traceTest.pushStore(1, 11, 23, "yapie")
-	// traceTest.pushTransfer(1, "chengdu", "tianshui", "yapie")
-	// traceTest.pushTransfer(1, "chengdu", "tianshui", "yapie")
-	// // fmt.Println(*traceTest)
-	// fmt.Println(*traceTest.crabs[1])
+	var traceTest *trace
+	traceTest = newTrace()
+	traceTest.addcrab(1, 11, "yapie")
+	traceTest.pushFeed(1, "milk", "yapie")
+	traceTest.pushWaterQuality(1, true, "chengdu agent", 1111, "yapie")
+	traceTest.pushTransfer(1, "chengdu", "tianshui", "yapie")
+	traceTest.pushStore(1, 11, 23, "yapie")
+	traceTest.pushTransfer(1, "chengdu", "tianshui", "yapie")
+	traceTest.pushTransfer(1, "chengdu", "tianshui", "yapie")
+	// fmt.Println(*traceTest)
+	fmt.Println(*traceTest.crabs[1])
 
-	// // fmt.Println((*traceTest).crabs[1].)
-	// fmt.Println((*traceTest).feedTrace[1])
-	if err := shim.Start(new(SimpleAsset)); err != nil {
-		fmt.Printf("Error starting SimpleAsset chaincode: %s", err)
-	}
+	// fmt.Println((*traceTest).crabs[1].)
+	fmt.Println((*traceTest).feedTrace[1])
+	// if err := shim.Start(new(SimpleAsset)); err != nil {
+	// 	fmt.Printf("Error starting SimpleAsset chaincode: %s", err)
+	// }
 
 }
