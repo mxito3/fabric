@@ -14,4 +14,6 @@
 	../github.com/hyperledger/fabric/vendor/github.com/docker/docker/pkg/archive/archive.go:1166:17: undefined: tar.FormatPAX
 	原因应该是go的语法的问题。
 	解决：
-		将依赖的github库切换到release-1.1.0
+		将依赖的github库切换到v1.1.0-alpha
+		git checkout -b v1.1.0-alpha
+
