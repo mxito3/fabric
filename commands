@@ -31,7 +31,11 @@ peer chaincode install -p chaincodedev/chaincode -n mycc -v 0
 peer chaincode instantiate -n mycc -v 0 -c '{"Args":["addcrab","1","1234","yapie"]}' -C myc
 
 调用
-peer chaincode invoke -n mycc -c '{"Args":["addcrab","2","1234","yapie"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["addcrab","1","1234","yapie"]}' -C myc
 peer chaincode invoke -n mycc -c '{"Args":["getTraceInfo","1"]}' -C myc
 
-peer chaincode invoke -n mycc -c '{"Args":["pushFeed",feed","yapie"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["pushFeed","1","feed","yapie"]}' -C myc
+
+peer chaincode invoke -n mycc -c '{"Args":["pushTransfer","1","成都","天水"]}' -C myc
+
+peer chaincode invoke -n mycc -c '{"Args":["isExsit","1"]}' -C myc
